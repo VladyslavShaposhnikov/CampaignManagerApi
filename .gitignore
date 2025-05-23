@@ -1,0 +1,40 @@
+## .NET Core
+bin/
+obj/
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+.vs/
+
+## Rider project files
+.idea/
+*.sln.iml
+
+## SQLite DB file
+*.db
+*.db-shm
+*.db-wal
+
+## Logs
+*.log
+
+## Build results
+*.exe
+*.dll
+*.app
+*.pdb
+
+## User-specific files
+*.swp
+*.DS_Store
+Thumbs.db
+
+## Environment files
+.env
+
+## Migrations (optional: if you want clean Git)
+# Migrations/
+
+## dotnet-ef cache
+.dotnet-tools/
