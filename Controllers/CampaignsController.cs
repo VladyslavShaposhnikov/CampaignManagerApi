@@ -24,7 +24,7 @@ public class CampaignsController : ControllerBase
             .Include(c => c.Keywords)
             .Include(c => c.Product)
             .ToArrayAsync();
-        var campaignsDto = campaigns.Select(c => c.ToCampaignDto());
+        var campaignsDto = campaigns.Select(c => c.ToListCampaignDto());
         return Ok(campaignsDto);
     }
     
@@ -69,7 +69,7 @@ public class CampaignsController : ControllerBase
         campaign.UpdateCampaignFromDto(dto);
 
         await _context.SaveChangesAsync();
-        return NoContent();
+        return Ok();
     }
     
     [HttpDelete("{id}")]

@@ -23,6 +23,16 @@ public class SellerController : ControllerBase
         var sellers = await _context.Sellers.ToListAsync();
         return Ok(sellers.Select(SellerMapper.ToDto));
     }
+    
+    [HttpGet("{id}/products")]
+    public async Task<IActionResult> GetProductsBySeller(int id)
+    {
+        var products = await _context.Products
+            .Where(p => p.SellerId == id)
+            .ToListAsync();
+
+        return Ok(products);
+    }
 
     [HttpGet("{id}")]
     public async Task<ActionResult<SellerReadDto>> Get(int id)

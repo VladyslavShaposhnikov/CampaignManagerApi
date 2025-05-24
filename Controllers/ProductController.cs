@@ -40,6 +40,17 @@ public class ProductController : ControllerBase
         await _context.SaveChangesAsync();
         return CreatedAtAction(nameof(Get), new { id = product.Id }, ProductMapper.ToDto(product));
     }
+    
+    [HttpGet("{id}/campaigns")]
+    public async Task<IActionResult> GetCampaignsByProductId(int id)
+    {
+        var campaigns = await _context.Campaigns
+            .Where(c => c.ProductId == id)
+            .Include(k => k.Keywords)
+            .ToListAsync();
+        var campaignsDto = campaigns.Select(c => c.ToCampaignDto());
+        return Ok(campaignsDto);
+    }
 
     [HttpPut("{id}")]
     public async Task<IActionResult> Update(int id, ProductDto dto)

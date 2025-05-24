@@ -42,6 +42,26 @@ public static class CampaignMapper
         };
     }
     
+    public static CampaignsListReadDto ToListCampaignDto(this Campaign campaign)
+    {
+        return new CampaignsListReadDto
+        {
+            Id = campaign.Id,
+            Name = campaign.Name,
+            BidAmount = campaign.BidAmount,
+            Fund = campaign.Fund,
+            Status = campaign.Status,
+            Town = campaign.Town,
+            RadiusKm = campaign.RadiusKm,
+            ProductId = campaign.ProductId,
+            ProductName = campaign.Product.Name,
+            
+            Keywords = campaign.Keywords.
+                Select(k => k.Name)
+                .ToList()
+        };
+    }
+    
     public static void UpdateCampaignFromDto(this Campaign campaign, CampaignCreateUpdateDto dto)
     {
         campaign.Name = dto.Name;
