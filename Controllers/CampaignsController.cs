@@ -48,9 +48,11 @@ public class CampaignsController : ControllerBase
             .Include(c => c.Keywords)
             .Include(c => c.Product)
             .FirstOrDefaultAsync(c => c.Id == id);
-        
+
         if (campaign == null)
+        {
             return NotFound();
+        }
         
         var campaignDto = campaign.ToCampaignDto();
         return Ok(campaignDto);
@@ -60,21 +62,45 @@ public class CampaignsController : ControllerBase
     public async Task<IActionResult> CreateCampaign(CampaignCreateUpdateDto dto)
     {
         var campaign = dto.ToCampaign();
-        var product = _context.Products.FirstOrDefault(p => p.Id == dto.ProductId);
-        var seller = _context.Sellers.FirstOrDefault(s => s.Products.Contains(product));
-        if (seller != null)
+        var seller = await _context.Sellers.FirstOrDefaultAsync(s => s.Products.Any(p => p.Id == dto.ProductId));
+        if (seller == null)
         {
-            if (dto.Fund > seller.EmeraldBalance)
-            {
-                return BadRequest();
-            }
-            seller.EmeraldBalance -= dto.Fund;
+            return NotFound();
         }
+        
+        if (dto.Fund > seller.EmeraldBalance)
+        {
+            return BadRequest("Fund is more than emerald");
+        }
+
+        if (dto.Fund < dto.BidAmount)
+        {
+            return BadRequest("Fund is less than bid");
+        }
+        
+        seller.EmeraldBalance -= dto.Fund;
         _context.Campaigns.Add(campaign);
         await _context.SaveChangesAsync();
         return CreatedAtAction(nameof(GetCampaignById), new { id = campaign.Id }, campaign.ToCampaignDto());
     }
     
+    [HttpPost("transmit/{id}")]
+    public async Task<IActionResult> CampaignDecreaseFund(int id)
+    {
+        var campaign = await _context.Campaigns.FirstOrDefaultAsync(c => c.Id == id);
+        if (campaign == null || campaign.Status == CampaignStatus.Off)
+        {
+            return BadRequest();
+        }
+        if (campaign.Fund < campaign.BidAmount * 2)
+        {
+            campaign.Status = CampaignStatus.Off;
+        }
+        campaign.Fund -= campaign.BidAmount;
+        _context.Campaigns.Update(campaign);
+        await _context.SaveChangesAsync();
+        return Ok(new { fund = campaign.Fund });
+    }
     
     [HttpPut("{id}")]
     public async Task<IActionResult> UpdateCampaign(int id, CampaignCreateUpdateDto dto)
@@ -83,21 +109,29 @@ public class CampaignsController : ControllerBase
             .Include(c => c.Keywords)
             .FirstOrDefaultAsync(c => c.Id == id);
         
-        var product = _context.Products.FirstOrDefault(p => p.Id == dto.ProductId);
-        var seller = _context.Sellers.FirstOrDefault(s => s.Products.Contains(product));
-        if (seller != null)
-        {
-            if (dto.Fund - campaign.Fund > seller.EmeraldBalance || dto.Fund < campaign.Fund)
-            {
-                return BadRequest();
-            }
-            seller.EmeraldBalance -= (dto.Fund - campaign.Fund);
-        }
-
-        if (campaign == null)
+        var product = await _context.Products.FirstOrDefaultAsync(p => p.Id == dto.ProductId);
+        
+        if (product == null)
         {
             return NotFound();
         }
+        var seller = await _context.Sellers.FirstOrDefaultAsync(s => s.Products.Contains(product));
+        
+        if (seller == null || campaign == null)
+        {
+            return NotFound();
+        }
+        
+        if (dto.Fund - campaign.Fund > seller.EmeraldBalance || dto.Fund < campaign.Fund)
+        {
+            return BadRequest();
+        }
+        if (dto.Fund < dto.BidAmount)
+        {
+            return BadRequest("Fund is less than bid");
+        }
+        seller.EmeraldBalance -= (dto.Fund - campaign.Fund);
+        
         // Clear old keywords
         _context.CampaignKeywords.RemoveRange(campaign.Keywords);
         // Update
@@ -112,7 +146,9 @@ public class CampaignsController : ControllerBase
     {
         var campaign = await _context.Campaigns.FindAsync(id);
         if (campaign == null)
+        {
             return NotFound();
+        }
 
         _context.Campaigns.Remove(campaign);
         await _context.SaveChangesAsync();
