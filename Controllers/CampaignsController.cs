@@ -62,7 +62,8 @@ public class CampaignsController : ControllerBase
     public async Task<IActionResult> CreateCampaign(CampaignCreateUpdateDto dto)
     {
         var campaign = dto.ToCampaign();
-        var seller = await _context.Sellers.FirstOrDefaultAsync(s => s.Products.Any(p => p.Id == dto.ProductId));
+        var seller = await _context.Sellers
+            .FirstOrDefaultAsync(s => s.Products.Any(p => p.Id == dto.ProductId));
         if (seller == null)
         {
             return NotFound();

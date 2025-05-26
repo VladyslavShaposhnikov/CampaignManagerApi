@@ -18,7 +18,7 @@ public class SellerController : ControllerBase
     }
 
     [HttpGet]
-    public async Task<ActionResult<IEnumerable<SellerReadDto>>> GetAll()
+    public async Task<ActionResult> GetAll()
     {
         var sellers = await _context.Sellers.ToListAsync();
         return Ok(sellers.Select(SellerMapper.ToDto));
@@ -35,7 +35,7 @@ public class SellerController : ControllerBase
     }
 
     [HttpGet("{id}")]
-    public async Task<ActionResult<SellerReadDto>> Get(int id)
+    public async Task<ActionResult> Get(int id)
     {
         var seller = await _context.Sellers.FindAsync(id);
         if (seller == null) return NotFound();
@@ -43,7 +43,7 @@ public class SellerController : ControllerBase
     }
 
     [HttpPost]
-    public async Task<ActionResult<SellerReadDto>> Create(SellerDto dto)
+    public async Task<ActionResult> Create(SellerDto dto)
     {
         var seller = SellerMapper.ToEntity(dto);
         _context.Sellers.Add(seller);

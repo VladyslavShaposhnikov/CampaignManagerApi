@@ -5,7 +5,7 @@ namespace CampaignManagerApi.Mappers;
 
 public static class ProductMapper
 {
-    public static ProductReadDto ToDto(Product product)
+    public static ProductReadDto ToDto(this Product product)
     {
         return new ProductReadDto
         {
@@ -15,7 +15,7 @@ public static class ProductMapper
         };
     }
 
-    public static Product ToEntity(ProductDto dto)
+    public static Product ToEntity(this ProductDto dto)
     {
         return new Product
         {
@@ -24,7 +24,7 @@ public static class ProductMapper
         };
     }
 
-    public static void UpdateEntity(Product product, ProductDto dto)
+    public static void UpdateEntity(this Product product, ProductDto dto)
     {
         product.Name = dto.Name;
         product.SellerId = dto.SellerId;
