@@ -43,6 +43,10 @@ public class CampaignKeywordController : ControllerBase
     [HttpPost]
     public async Task<IActionResult> CreateCampaignKeyword(CampaignKeywordsDto dto)
     {
+        if (!ModelState.IsValid)
+        {
+            return BadRequest(ModelState);
+        }
         var campaignKeyword = dto.ToCampaignKeyword();
         _context.CampaignKeywords.Add(campaignKeyword);
         await _context.SaveChangesAsync();

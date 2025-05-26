@@ -20,8 +20,11 @@ public class ProductController : ControllerBase
     [HttpGet]
     public async Task<ActionResult> GetAll()
     {
-        var products = await _context.Products.ToListAsync();
-        var productsDto = products.Select(p => p.ToDto());
+        var products = await _context.Products
+            .Include(p => p.Seller)
+            .ToListAsync();
+        var productsDto = products.Select(p => p.ToWithSellerDto());
+        Console.WriteLine(string.Join(", ", products.Select(s => s.Seller.Name)));
         return Ok(productsDto);
     }
 
@@ -40,6 +43,10 @@ public class ProductController : ControllerBase
     [HttpPost]
     public async Task<ActionResult> Create(ProductDto dto)
     {
+        if (!ModelState.IsValid)
+        {
+            return BadRequest(ModelState);
+        }
         var product = ProductMapper.ToEntity(dto);
         _context.Products.Add(product);
         await _context.SaveChangesAsync();
@@ -61,6 +68,10 @@ public class ProductController : ControllerBase
     [HttpPut("{id}")]
     public async Task<IActionResult> Update(int id, ProductDto dto)
     {
+        if (!ModelState.IsValid)
+        {
+            return BadRequest(ModelState);
+        }
         var product = await _context.Products.FindAsync(id);
         if (product == null)
         {

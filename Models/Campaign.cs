@@ -8,8 +8,7 @@ public class Campaign
     public decimal Fund { get; set; }
     public CampaignStatus Status { get; set; } 
     public string Town { get; set; }
-    public double RadiusKm { get; set; }
-
+    public int RadiusKm { get; set; }
     public int ProductId { get; set; }
     public Product Product { get; set; }
     

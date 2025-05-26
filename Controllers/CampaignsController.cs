@@ -61,6 +61,10 @@ public class CampaignsController : ControllerBase
     [HttpPost]
     public async Task<IActionResult> CreateCampaign(CampaignCreateUpdateDto dto)
     {
+        if (!ModelState.IsValid)
+        {
+            return BadRequest(ModelState);
+        }
         var campaign = dto.ToCampaign();
         var seller = await _context.Sellers
             .FirstOrDefaultAsync(s => s.Products.Any(p => p.Id == dto.ProductId));
@@ -71,12 +75,12 @@ public class CampaignsController : ControllerBase
         
         if (dto.Fund > seller.EmeraldBalance)
         {
-            return BadRequest("Fund is more than emerald");
+            return BadRequest(new { errors = new[] { "Fund is more than emerald" } });
         }
 
         if (dto.Fund < dto.BidAmount)
         {
-            return BadRequest("Fund is less than bid");
+            return BadRequest(new { errors = new[] { "Fund is less than bid" } });
         }
         
         seller.EmeraldBalance -= dto.Fund;
@@ -106,6 +110,10 @@ public class CampaignsController : ControllerBase
     [HttpPut("{id}")]
     public async Task<IActionResult> UpdateCampaign(int id, CampaignCreateUpdateDto dto)
     {
+        if (!ModelState.IsValid)
+        {
+            return BadRequest(ModelState);
+        }
         var campaign = await _context.Campaigns
             .Include(c => c.Keywords)
             .FirstOrDefaultAsync(c => c.Id == id);
@@ -129,7 +137,7 @@ public class CampaignsController : ControllerBase
         }
         if (dto.Fund < dto.BidAmount)
         {
-            return BadRequest("Fund is less than bid");
+            return BadRequest(new { errors = new[] { "Fund is less than bid" } });
         }
         seller.EmeraldBalance -= (dto.Fund - campaign.Fund);
         

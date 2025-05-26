@@ -14,6 +14,17 @@ public static class ProductMapper
             SellerId = product.SellerId
         };
     }
+    
+    public static ProductWithSellerReadDto ToWithSellerDto(this Product product)
+    {
+        return new ProductWithSellerReadDto
+        {
+            Id = product.Id,
+            Name = product.Name,
+            SellerName = product.Seller.Name,
+            SellerId = product.SellerId
+        };
+    }
 
     public static Product ToEntity(this ProductDto dto)
     {
