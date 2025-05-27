@@ -95,7 +95,7 @@ public class CampaignsController : ControllerBase
         var campaign = await _context.Campaigns.FirstOrDefaultAsync(c => c.Id == id);
         if (campaign == null || campaign.Status == CampaignStatus.Off)
         {
-            return BadRequest();
+            return BadRequest(new { errors = new[] { "Status is Off" } });
         }
         if (campaign.Fund < campaign.BidAmount * 2)
         {
@@ -133,7 +133,7 @@ public class CampaignsController : ControllerBase
         
         if (dto.Fund - campaign.Fund > seller.EmeraldBalance || dto.Fund < campaign.Fund)
         {
-            return BadRequest();
+            return BadRequest(new { errors = new[] { "You dont have enough money on your account or you try to decrease fund" } });
         }
         if (dto.Fund < dto.BidAmount)
         {
